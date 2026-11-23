@@ -1,0 +1,57 @@
+name: Install problem
+description: Report a problem installing, upgrading or uninstalling with Homebrew
+title: "[INSTALL] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem with this tap. For a problem with a tool itself, please use that tool's repository.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: "I ran `brew update` and tried again"
+          required: true
+        - label: "I have searched the existing issues and there are no duplicates"
+          required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - box
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The brew command that failed.
+      placeholder: brew install --cask strands-agents/tap/box
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The full output of the command, rerun with `--verbose --debug`.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: brew config
+      description: The output of `brew config`.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Other `box` installs on this machine (`which -a box`), or anything else that helps.
+    validations:
+      required: false

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Strands Box issues
+    url: https://github.com/strands-agents/box/issues
+    about: Report a problem with Box itself, not with installing it through Homebrew
+  - name: Strands Box discussions
+    url: https://github.com/strands-agents/box/discussions
+    about: Ask and answer questions about Strands Box
+  - name: Strands Agents Community
+    url: https://discord.gg/strands
+    about: Chat with the Strands team and community on Discord
