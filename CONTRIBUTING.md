@@ -6,7 +6,7 @@ pull request.
 ## What belongs here
 
 This tap holds the Homebrew casks for Strands command-line tools. A cask installs the release
-package that the tool's own repository publishes, unchanged. It doesn't build or change it.
+package that the tool's own repository publishes, unchanged.
 
 - Problems with installing, upgrading or uninstalling through Homebrew belong in this repository.
 - Problems with a tool itself belong in that tool's repository, such as
@@ -78,7 +78,13 @@ A new package needs:
 1. Work from the latest `main` branch, and check that no open pull request already makes the change.
 2. Make a focused change. Please don't reformat unrelated files.
 3. Run the linters and the test script.
-4. Open a pull request, and respond to review feedback.
+4. [Fork this repository](https://github.com/strands-agents/homebrew-tap/fork), push your branch to
+   the fork, and open a pull request:
+   ```sh
+   git remote add fork https://github.com/<you>/homebrew-tap.git
+   git push fork my-change
+   ```
+5. Respond to review feedback.
 
 ## Using AI tools
 

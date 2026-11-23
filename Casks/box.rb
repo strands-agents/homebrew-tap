@@ -29,7 +29,7 @@ cask "box" do
   zap :not_required
 
   caveats <<~EOS
-    box sends usage telemetry to telemetry.strandsagents.com. To opt out, run:
+    box sends usage telemetry to telemetry.strandsagents.com unless you opt out. To opt out, run:
       box telemetry off
     To learn more:
       https://github.com/strands-agents/box/blob/main/CLI_TELEMETRY.md

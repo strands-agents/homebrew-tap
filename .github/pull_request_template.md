@@ -14,7 +14,7 @@
 
 ## Checklist
 
-- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) document
+- [ ] I have read the [CONTRIBUTING](https://github.com/strands-agents/homebrew-tap/blob/main/CONTRIBUTING.md) document
 - [ ] Each `url` points at the tool's official GitHub release, and each checksum matches its `SHA256SUMS.txt`
 - [ ] I have updated the README if a package was added or its requirements changed
 

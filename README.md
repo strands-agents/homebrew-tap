@@ -81,7 +81,8 @@ brew update
 brew upgrade --cask box
 ```
 
-The cask installs Box's newest stable release and skips pre-releases.
+The cask follows Box's stable releases and skips pre-releases. A new release reaches the tap when its
+bump pull request is merged.
 
 ## Uninstall
 
@@ -115,7 +116,9 @@ rm -rf ~/.strands/box/packages
 rm ~/.local/bin/box
 ```
 
-Your profiles in `~/.strands/box` keep working. Check that your shell finds Homebrew's `box`:
+Your profiles in `~/.strands/box` keep working. If the script also added a `# >>> Box PATH >>>` block
+to your shell's startup file, [Uninstall](https://github.com/strands-agents/box/blob/main/docs/cli/install.md#uninstall)
+says how to remove it. Check that your shell finds Homebrew's `box`:
 
 ```sh
 which -a box
@@ -123,8 +126,8 @@ which -a box
 
 ## Verify the install
 
-Homebrew checks each download against the SHA-256 checksum in the cask. The cask takes its checksums
-from the release's `SHA256SUMS.txt`.
+Homebrew checks each download against the SHA-256 checksum in the cask. Those checksums match the
+release's `SHA256SUMS.txt`.
 
 On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
 keeps both:
