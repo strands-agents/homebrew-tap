@@ -1,14 +1,12 @@
 # Contributing to the Strands Homebrew Tap
 
-Thank you for your interest in contributing. Whether it's a bug report, a fix or a new package, we
-value feedback and contributions from the community.
-
-Please read this document before you open an issue or a pull request.
+Thank you for your interest in contributing. Please read this document before you open an issue or a
+pull request.
 
 ## What belongs here
 
-This tap holds the Homebrew recipes for Strands tools. A recipe installs the release package that
-the tool's own repository publishes. It doesn't build or change it.
+This tap holds the Homebrew casks for Strands command-line tools. A cask installs the release
+package that the tool's own repository publishes, unchanged.
 
 - Problems with installing, upgrading or uninstalling through Homebrew belong in this repository.
 - Problems with a tool itself belong in that tool's repository, such as
@@ -26,10 +24,12 @@ You don't need to open a pull request for a new release yourself.
 
 ## Make a change
 
-Homebrew works on a tap in its own checkout. Tap this repository, then work in that checkout:
+Homebrew works on a tap in its own checkout. Tap this repository, trust it, then work in that
+checkout:
 
 ```sh
 brew tap strands-agents/tap
+brew trust strands-agents/tap
 cd "$(brew --repository strands-agents/tap)"
 git checkout -b my-change
 ```
@@ -38,13 +38,17 @@ Check your change with Homebrew's own linters:
 
 ```sh
 brew style --fix strands-agents/tap
-brew audit --strict --online --tap=strands-agents/tap
+brew audit --strict --online --os=all --arch=all --tap=strands-agents/tap
 ```
 
-Then install your version and run its test:
+`--os=all --arch=all` matters: without it, `brew audit` on Linux skips any cask that has
+`depends_on macos`.
+
+Then install your version and run its test. Use `reinstall`, so that a `box` you already have is
+replaced by your version:
 
 ```sh
-brew install --cask strands-agents/tap/box
+brew reinstall --cask strands-agents/tap/box
 .github/tests/box.sh
 ```
 
@@ -53,7 +57,7 @@ box that may write in its project and checks that a write outside the project fa
 temporary folder in your home folder and deletes it at the end, so it leaves your `~/.strands/box`
 alone. On Linux, it needs unprivileged user namespaces.
 
-Follow Homebrew's [Cask Cookbook](https://docs.brew.sh/Cask-Cookbook) for the recipe format. Keep a
+Follow Homebrew's [Cask Cookbook](https://docs.brew.sh/Cask-Cookbook) for the cask format. Keep a
 cask's `url` on the tool's own GitHub releases, and take its checksums from the release's
 `SHA256SUMS.txt`.
 
@@ -61,34 +65,26 @@ cask's `url` on the tool's own GitHub releases, and take its checksums from the 
 
 A new package needs:
 
-1. A recipe in `Casks/` (prebuilt, signed release packages) or `Formula/` (Homebrew builds it).
-2. A test script in `.github/tests/` that installs it and checks that it runs.
+1. A cask in `Casks/` for prebuilt release packages, or a formula in `Formula/` that Homebrew
+   builds.
+2. A test script in `.github/tests/` that checks the installed package and that it runs.
 3. A job in [`tests.yml`](.github/workflows/tests.yml) that runs that script on every platform the
-   recipe supports.
+   package supports.
 4. Its name in [`autobump.yml`](.github/workflows/autobump.yml).
 5. A row in the package table in the [README](README.md).
 
-Please open an issue first to discuss a new package.
-
 ## Pull requests
 
-Before you send a pull request, please make sure that:
-
-1. You are working against the latest `main` branch.
-2. You checked open and recently merged pull requests to make sure someone else hasn't addressed
-   the problem already.
-3. You opened an issue to discuss any significant work.
-
-To send a pull request:
-
-1. Fork the repository.
+1. Work from the latest `main` branch, and check that no open pull request already makes the change.
 2. Make a focused change. Please don't reformat unrelated files.
 3. Run the linters and the test script.
-4. Commit with a clear message, and open a pull request.
-5. Watch the checks on your pull request, and respond to review feedback.
-
-GitHub provides more documentation on [forking a repository](https://help.github.com/articles/fork-a-repo/)
-and [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
+4. [Fork this repository](https://github.com/strands-agents/homebrew-tap/fork), push your branch to
+   the fork, and open a pull request:
+   ```sh
+   git remote add fork https://github.com/<you>/homebrew-tap.git
+   git push fork my-change
+   ```
+5. Respond to review feedback.
 
 ## Using AI tools
 
@@ -98,17 +94,13 @@ first. You own every line you submit, and you should be able to explain why it w
 
 ## Code of Conduct
 
-This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
-For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
-opensource-codeofconduct@amazon.com with any additional questions or comments.
+This project has adopted the [Amazon Open Source Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Security issue notifications
+## Security
 
-If you discover a potential security issue in this project, we ask that you notify AWS/Amazon Security
-via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please
-do **not** create a public GitHub issue.
+See [SECURITY.md](SECURITY.md). Please don't open a public issue for a security problem.
 
 ## Licensing
 
-See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to confirm the licensing of
-your contribution.
+See the [LICENSE](LICENSE) file for this project's licensing. We will ask you to confirm the
+licensing of your contribution.
