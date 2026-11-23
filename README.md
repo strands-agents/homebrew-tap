@@ -10,7 +10,7 @@
 
   <h1>Strands Homebrew Tap</h1>
 
-  <h2>Install Strands tools with Homebrew on macOS and Linux.</h2>
+  <h2>Install Strands command-line tools with Homebrew on macOS and Linux.</h2>
 
   <div align="center">
     <a href="https://github.com/strands-agents/homebrew-tap/actions/workflows/tests.yml"><img src="https://github.com/strands-agents/homebrew-tap/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
@@ -24,11 +24,12 @@
 ## Overview
 
 This is the official [Homebrew tap](https://docs.brew.sh/Taps) for [Strands Agents](https://strandsagents.com).
-It installs the signed release packages that Strands publishes on GitHub, without rebuilding them.
+It installs the release packages that Strands publishes on GitHub, unchanged. Homebrew doesn't
+rebuild them.
 
 | Package | Type | Description |
 | --- | --- | --- |
-| [`box`](Casks/box.rb) | Cask | [Strands Box](https://github.com/strands-agents/box): run coding agents like Claude Code in a sandbox, under a policy you control |
+| [`box`](Casks/box.rb) | Cask | [Strands Box](https://github.com/strands-agents/box): sandbox for running AI coding agents under a policy |
 
 ## Install Strands Box
 
@@ -43,8 +44,11 @@ that it works:
 box --version
 ```
 
-Then follow [Get started with Box](https://github.com/strands-agents/box/blob/main/docs/cli/getting-started.md)
-to make a profile and run your first agent.
+Then [create a profile](https://github.com/strands-agents/box/blob/main/docs/cli/getting-started.md#2-create-a-claude-code-profile)
+and run your first agent. Box is already installed, so skip that guide's install step.
+
+`box` sends usage telemetry. To opt out, run `box telemetry off`.
+[Usage telemetry](https://github.com/strands-agents/box/blob/main/CLI_TELEMETRY.md) says what it sends.
 
 ### Requirements
 
@@ -54,7 +58,8 @@ to make a profile and run your first agent.
 | Linux on ARM64 or x86-64, glibc 2.34 or later | Yes |
 | Intel Macs | No |
 
-On Linux, the box needs unprivileged user namespaces. See
+On Linux, the box needs unprivileged user namespaces. Ubuntu 24.04 blocks them by default, so a box
+won't start until AppArmor lets Box's `strands-box-contain-trampoline` create them. See
 [Linux requirements](https://github.com/strands-agents/box/blob/main/docs/user/linux-requirements.md).
 
 ### Install by short name
@@ -76,7 +81,7 @@ brew update
 brew upgrade --cask box
 ```
 
-The tap follows Strands Box's stable releases. It doesn't offer preview releases.
+The cask installs Box's newest stable release and skips pre-releases.
 
 ## Uninstall
 
@@ -96,12 +101,18 @@ brew untap strands-agents/tap
 ## Switch from the install script
 
 Use one install method on a machine, so that `box` on your `PATH` is the one you upgrade. To switch
-from the install script to Homebrew, remove the script's release files and link, then install the cask:
+from the install script to Homebrew, install the cask first:
+
+```sh
+brew install --cask strands-agents/tap/box
+```
+
+Then remove what the install script added. The first command deletes the script's release files, and
+the second deletes its link to them:
 
 ```sh
 rm -rf ~/.strands/box/packages
 rm ~/.local/bin/box
-brew install --cask strands-agents/tap/box
 ```
 
 Your profiles in `~/.strands/box` keep working. Check that your shell finds Homebrew's `box`:
@@ -112,15 +123,18 @@ which -a box
 
 ## Verify the install
 
-On macOS, the cask keeps Apple's signature and notarization from the release:
+Homebrew checks each download against the SHA-256 checksum in the cask. The tap's tests check that
+those checksums match the release's `SHA256SUMS.txt`.
+
+On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
+keeps both:
 
 ```sh
 codesign --verify --strict --verbose=2 "$(brew --caskroom)/box/$(box --version | cut -d' ' -f2)/box"
 spctl --assess --type install --verbose "$(brew --caskroom)/box/$(box --version | cut -d' ' -f2)/box"
 ```
 
-`spctl` prints `source=Notarized Developer ID`. On both platforms, Homebrew checks each download
-against the SHA-256 checksum in the cask, which matches the release's `SHA256SUMS.txt`.
+`spctl` prints `source=Notarized Developer ID`. The Linux packages aren't signed.
 
 ## Troubleshooting
 

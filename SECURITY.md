@@ -2,12 +2,12 @@
 
 ## Scope
 
-This repository holds Homebrew recipes and the workflows that test and update them. A security issue
+This repository holds Homebrew casks and the workflows that test and update them. A security issue
 here includes:
 
-- A recipe that downloads from a source other than the tool's official GitHub releases
+- A cask that downloads from a source other than the tool's official GitHub releases
 - A checksum that doesn't match the release's published `SHA256SUMS.txt`
-- A recipe or workflow that changes, re-signs or replaces a release package
+- A cask or workflow that changes, re-signs or replaces a release package
 - A workflow that exposes a token or lets an untrusted pull request write to the repository
 
 Security issues in a tool itself, such as a way out of a Strands Box sandbox, belong to that tool. See

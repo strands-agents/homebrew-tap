@@ -14,7 +14,7 @@ cask "box" do
 
   url "https://github.com/strands-agents/box/releases/download/v#{version}/box-cli-v#{version}-#{arch}-#{os}.tar.gz"
   name "Strands Box"
-  desc "Run AI agents in a sandbox that limits what they can run, read, write and reach"
+  desc "Sandbox for running AI coding agents under a policy"
   homepage "https://github.com/strands-agents/box"
 
   livecheck do
@@ -27,4 +27,11 @@ cask "box" do
 
   # ~/.strands/box holds the user's profiles and run history.
   zap :not_required
+
+  caveats <<~EOS
+    box sends usage telemetry to telemetry.strandsagents.com. To opt out, run:
+      box telemetry off
+    To learn more:
+      https://github.com/strands-agents/box/blob/main/CLI_TELEMETRY.md
+  EOS
 end
