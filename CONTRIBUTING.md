@@ -73,9 +73,6 @@ A new package needs:
 4. Its name in [`autobump.yml`](.github/workflows/autobump.yml).
 5. A row in the package table in the [README](README.md).
 
-Please [request the package](https://github.com/strands-agents/homebrew-tap/issues/new?template=package_request.yml)
-before you start.
-
 ## Pull requests
 
 1. Work from the latest `main` branch, and check that no open pull request already makes the change.
