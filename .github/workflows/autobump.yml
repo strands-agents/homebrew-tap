@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 20
     steps:
       # Pull requests opened with the default token don't start the Tests workflow, so the bump
-      # needs its own token. Use a fine-grained token or a GitHub App limited to this repository,
-      # with contents and pull-requests write access.
+      # needs its own token, limited to this repository, with contents and pull-requests write
+      # access.
       - name: Check the bump token
         id: token
         env:

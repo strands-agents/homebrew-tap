@@ -1,6 +1,12 @@
 #!/bin/bash
 # Checks that every download in a cask has the checksum its release lists in SHA256SUMS.txt.
 # A bump hashes whatever it downloads, so this ties the cask back to what the release published.
+#
+# It reads the cask as Homebrew evaluates it on this machine, for every OS and architecture. That
+# covers declarative casks, like the ones in this tap. A cask that branches on something else, such
+# as an environment variable, can show this check a different download than a user gets.
+#
+# It runs on the bash 3.2 that macOS ships.
 set -euo pipefail
 
 fail() {
@@ -10,7 +16,10 @@ fail() {
 
 # With no arguments, check every cask in the tap.
 if [ "$#" -eq 0 ]; then
-    mapfile -t casks < <(brew tap-info --json strands-agents/tap | jq -r '.[0].cask_tokens[]')
+    casks=()
+    while IFS= read -r token; do
+        casks+=("$token")
+    done < <(brew tap-info --json strands-agents/tap | jq -r '.[0].cask_tokens[]')
     [ "${#casks[@]}" -gt 0 ] || fail "strands-agents/tap has no casks"
     set -- "${casks[@]}"
 fi
@@ -26,8 +35,14 @@ for cask in "$@"; do
     # The base entry is this runner's platform; each variation adds another platform's download.
     brew info --cask --json=v2 --variations "$cask" | jq -r '
         .casks[0] as $cask
-        | ([{url: $cask.url, sha256: $cask.sha256}]
-           + [($cask.variations // {})[] | select(.url and .sha256) | {url, sha256}])
+        # Homebrew lists the downloads of language blocks apart from the variations, so refuse them.
+        | if [$cask | .. | objects | select((.language_variations // []) | length > 0)] | length > 0
+          then error("\($cask.full_token): language blocks are not supported") else . end
+        # A variation lists only the fields that differ, so the rest comes from the base entry.
+        # Homebrew does not download on a platform that has no sha256, so those are left out.
+        | [$cask, ($cask.variations // {})[]]
+        | map({url: (.url // $cask.url), sha256: (if has("sha256") then .sha256 else $cask.sha256 end)})
+        | map(select(.sha256 != null))
         | unique[]
         | "\(.url) \(.sha256)"
     ' > "$work/downloads"
