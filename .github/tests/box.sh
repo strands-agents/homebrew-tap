@@ -42,7 +42,8 @@ if [ "$(uname -s)" = Darwin ]; then
 fi
 
 echo "==> Box run"
-home=$(mktemp -d)
+# Not under /tmp: a Linux box gets a private /tmp, so a write there never reaches the host.
+home=$(mktemp -d "${RUNNER_TEMP:-$HOME}/box-cask-test.XXXXXX")
 trap 'rm -rf "$home"' EXIT
 mkdir -p "$home/.strands/box/profiles" "$home/project"
 cp -R "$here/box" "$home/.strands/box/profiles/probe"
@@ -59,9 +60,10 @@ run profile create claude --with bedrock --policy open
 run run probe --no-banner -- -c 'echo inside > proof.txt'
 [ "$(cat proof.txt)" = inside ] || fail "the box could not write in the project"
 
-if run run probe --no-banner -- -c "echo outside > '$home/outside.txt'"; then
+echo original > "$home/outside.txt"
+if run run probe --no-banner -- -c "echo changed > '$home/outside.txt'"; then
     fail "the box wrote outside the project"
 fi
-[ ! -e "$home/outside.txt" ] || fail "the box wrote outside the project"
+[ "$(cat "$home/outside.txt")" = original ] || fail "the box changed a file outside the project"
 
 echo "==> box $version passed"

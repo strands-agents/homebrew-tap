@@ -50,8 +50,8 @@ brew install --cask strands-agents/tap/box
 
 The test script checks the installed cask's files and, on macOS, its signatures. Then it starts a
 box that may write in its project and checks that a write outside the project fails. It works in a
-temporary home folder, so it leaves your `~/.strands/box` alone. On Linux, it needs unprivileged
-user namespaces.
+temporary folder in your home folder and deletes it at the end, so it leaves your `~/.strands/box`
+alone. On Linux, it needs unprivileged user namespaces.
 
 Follow Homebrew's [Cask Cookbook](https://docs.brew.sh/Cask-Cookbook) for the recipe format. Keep a
 cask's `url` on the tool's own GitHub releases, and take its checksums from the release's
