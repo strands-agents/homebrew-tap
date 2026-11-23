@@ -1,0 +1,8 @@
+# A shell profile for the cask test. It needs no agent and no model key.
+[project]
+access = "write"
+
+[agent]
+command = ["/bin/bash", "--noprofile", "--norc"]
+env.PATH = "/usr/bin:/bin"
+env.TMPDIR = "${{ workspace }}"
