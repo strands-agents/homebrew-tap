@@ -19,7 +19,8 @@ jobs:
     timeout-minutes: 20
     steps:
       # Pull requests opened with the default token don't start the Tests workflow, so the bump
-      # needs its own token with contents and pull-requests write access on this repository.
+      # needs its own token. Use a fine-grained token or a GitHub App limited to this repository,
+      # with contents and pull-requests write access.
       - name: Check the bump token
         id: token
         env:
@@ -32,12 +33,21 @@ jobs:
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+      # setup-homebrew turns its token into git's credential for every github.com request in
+      # this job, ahead of any token in a push URL. So it gets the bump token too: with the
+      # read-only default token here, the bump's push would fail.
+      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         if: steps.token.outputs.present == 'true'
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.HOMEBREW_TAP_BUMP_TOKEN }}
 
-      - uses: Homebrew/actions/bump-packages@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+      # brew bump commits before it pushes, so git needs a name and an email.
+      - uses: Homebrew/actions/git-user-config@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+        if: steps.token.outputs.present == 'true'
+        with:
+          username: github-actions[bot]
+
+      - uses: Homebrew/actions/bump-packages@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         if: steps.token.outputs.present == 'true'
         with:
           token: ${{ secrets.HOMEBREW_TAP_BUMP_TOKEN }}

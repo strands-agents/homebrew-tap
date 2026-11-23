@@ -28,15 +28,19 @@ jobs:
     timeout-minutes: 20
     steps:
       # setup-homebrew fetches this tap itself; the token lets it read a private repository.
-      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         with:
           token: ${{ github.token }}
 
       - name: Style
         run: brew style strands-agents/tap
 
+      # Without --os=all, audit on Linux skips every cask that has depends_on macos.
       - name: Audit
-        run: brew audit --strict --online --tap=strands-agents/tap
+        run: brew audit --strict --online --os=all --arch=all --tap=strands-agents/tap
+
+      - name: Checksums
+        run: .github/tests/checksums.sh strands-agents/tap/box
 
       - name: Livecheck
         run: brew livecheck --tap=strands-agents/tap
@@ -54,7 +58,7 @@ jobs:
       BOX_TELEMETRY: "0"
       DO_NOT_TRACK: "1"
     steps:
-      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         with:
           token: ${{ github.token }}
 
@@ -75,3 +79,21 @@ jobs:
         run: |
           brew uninstall --cask box
           test ! -e "$(brew --prefix)/bin/box"
+
+  # The one check the main branch ruleset requires. It fails if any job above failed or was
+  # skipped, so a new job only needs to be added to this list.
+  gate:
+    name: CI Gate
+    if: always()
+    needs: [syntax, box]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check the jobs
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = success ] || exit 1
+          done
