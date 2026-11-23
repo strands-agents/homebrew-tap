@@ -9,7 +9,7 @@ cask "box" do
 
   on_macos do
     depends_on arch: :arm64
-    depends_on macos: ">= :sequoia"
+    depends_on macos: :sequoia
   end
 
   url "https://github.com/strands-agents/box/releases/download/v#{version}/box-cli-v#{version}-#{arch}-#{os}.tar.gz"
