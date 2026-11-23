@@ -40,7 +40,7 @@ jobs:
         run: brew audit --strict --online --os=all --arch=all --tap=strands-agents/tap
 
       - name: Checksums
-        run: .github/tests/checksums.sh strands-agents/tap/box
+        run: .github/tests/checksums.sh
 
       - name: Livecheck
         run: brew livecheck --tap=strands-agents/tap

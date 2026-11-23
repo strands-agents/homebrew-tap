@@ -3,12 +3,21 @@
 # A bump hashes whatever it downloads, so this ties the cask back to what the release published.
 set -euo pipefail
 
-[ "$#" -gt 0 ] || set -- strands-agents/tap/box
-
 fail() {
     echo "error: $*" >&2
     exit 1
 }
+
+# With no arguments, check every cask in the tap.
+if [ "$#" -eq 0 ]; then
+    mapfile -t casks < <(brew tap-info --json strands-agents/tap | jq -r '.[0].cask_tokens[]')
+    [ "${#casks[@]}" -gt 0 ] || fail "strands-agents/tap has no casks"
+    set -- "${casks[@]}"
+fi
+
+# Each part of the path must be one plain segment. A `.` or `..` segment, or a percent-escape,
+# could point the download, and its SHA256SUMS.txt, at another owner's release.
+release_url='^https://github\.com/strands-agents/([A-Za-z0-9_.-]+)/releases/download/([^/?#%]+)/([^/?#%]+)$'
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -25,10 +34,13 @@ for cask in "$@"; do
     [ -s "$work/downloads" ] || fail "$cask has no downloads"
 
     while read -r url sha256; do
-        case "$url" in
-            https://github.com/strands-agents/*/releases/download/*) ;;
-            *) fail "$cask downloads from outside a strands-agents GitHub release: $url" ;;
-        esac
+        [[ "$url" =~ $release_url ]] ||
+            fail "$cask downloads from outside a strands-agents GitHub release: $url"
+        for part in "${BASH_REMATCH[@]:1}"; do
+            case "$part" in
+                . | ..) fail "$cask downloads from outside a strands-agents GitHub release: $url" ;;
+            esac
+        done
         asset=${url##*/}
         sums="$work/$(printf '%s' "${url%/*}" | tr -c 'A-Za-z0-9' _)"
         [ -f "$sums" ] || curl -fsSL --retry 3 "${url%/*}/SHA256SUMS.txt" -o "$sums" ||
