@@ -17,9 +17,8 @@ package that the tool's own repository publishes, unchanged. It doesn't build or
 The [Bump casks](.github/workflows/autobump.yml) workflow runs every few hours. It uses
 [`brew livecheck`](https://docs.brew.sh/Brew-Livecheck) to find each tool's newest stable GitHub
 release, and opens a pull request that updates the cask's version and checksums. The
-[Tests](.github/workflows/tests.yml) workflow then checks the checksums against the release's
-`SHA256SUMS.txt` and installs the release on every supported platform. A maintainer merges the pull
-request once the `CI Gate` check passes.
+[Tests](.github/workflows/tests.yml) workflow then installs that release on every supported platform.
+A maintainer merges the pull request when the tests pass.
 
 You don't need to open a pull request for a new release yourself.
 
@@ -35,12 +34,11 @@ cd "$(brew --repository strands-agents/tap)"
 git checkout -b my-change
 ```
 
-Check your change with Homebrew's own linters, and check the checksums against the release:
+Check your change with Homebrew's own linters:
 
 ```sh
 brew style --fix strands-agents/tap
 brew audit --strict --online --os=all --arch=all --tap=strands-agents/tap
-.github/tests/checksums.sh strands-agents/tap/box
 ```
 
 `--os=all --arch=all` matters: without it, `brew audit` on Linux skips any cask that has
@@ -54,7 +52,7 @@ brew reinstall --cask strands-agents/tap/box
 .github/tests/box.sh
 ```
 
-The test script checks the installed cask's signatures on macOS, then its files. Then it starts a
+The test script checks the installed cask's files and, on macOS, its signatures. Then it starts a
 box that may write in its project and checks that a write outside the project fails. It works in a
 temporary folder in your home folder and deletes it at the end, so it leaves your `~/.strands/box`
 alone. On Linux, it needs unprivileged user namespaces.
@@ -71,8 +69,8 @@ A new package needs:
    builds.
 2. A test script in `.github/tests/` that checks the installed package and that it runs.
 3. A job in [`tests.yml`](.github/workflows/tests.yml) that runs that script on every platform the
-   package supports, listed in the `CI Gate` job's `needs`.
-4. Its name in [`autobump.yml`](.github/workflows/autobump.yml) and in the checksum step.
+   package supports.
+4. Its name in [`autobump.yml`](.github/workflows/autobump.yml).
 5. A row in the package table in the [README](README.md).
 
 Please [request the package](https://github.com/strands-agents/homebrew-tap/issues/new?template=package_request.yml)
@@ -82,7 +80,7 @@ before you start.
 
 1. Work from the latest `main` branch, and check that no open pull request already makes the change.
 2. Make a focused change. Please don't reformat unrelated files.
-3. Run the linters, the checksum check and the test script.
+3. Run the linters and the test script.
 4. Open a pull request, and respond to review feedback.
 
 ## Using AI tools

@@ -123,8 +123,8 @@ which -a box
 
 ## Verify the install
 
-Homebrew checks each download against the SHA-256 checksum in the cask. The tap's tests check that
-those checksums match the release's `SHA256SUMS.txt`.
+Homebrew checks each download against the SHA-256 checksum in the cask. The cask takes its checksums
+from the release's `SHA256SUMS.txt`.
 
 On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
 keeps both:
