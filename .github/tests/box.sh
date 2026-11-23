@@ -1,5 +1,5 @@
 #!/bin/bash
-# Checks an installed box cask: its files, its signatures on macOS, and a real box run.
+# Checks an installed box cask: its signatures on macOS, its files, and a real box run.
 # It uses a temporary home folder, so it doesn't touch ~/.strands/box.
 set -euo pipefail
 
@@ -16,30 +16,32 @@ version=$(brew info --cask --json=v2 "$cask" | jq -r '.casks[0].installed // emp
 room="$(brew --caskroom)/box/$version"
 box="$(brew --prefix)/bin/box"
 
-echo "==> Installed files"
-ls -la "$box" "$room"
-[ "$(readlink "$box")" = "$room/box" ] || fail "$box does not link to $room/box"
-[ "$("$box" --version)" = "box $version" ] || fail "box --version does not print box $version"
-for file in strands-box-sock-alias strands-box-contain-trampoline release.json resources/packs/base/pack.toml; do
-    [ -e "$room/$file" ] || fail "missing $room/$file"
-done
-"$box" help agent | grep -F "$room/resources/packs" > /dev/null ||
-    fail "box help agent does not name the packs in $room/resources"
-
+# Check the signatures before running any program from the download. The system tools are called
+# by their full paths, so nothing on PATH can stand in for them.
 if [ "$(uname -s)" = Darwin ]; then
     echo "==> Signatures"
     team=94KV3E626L
     for program in box strands-box-sock-alias strands-box-contain-trampoline; do
-        codesign --verify --strict --verbose=2 "$room/$program"
-        details=$(codesign --display --verbose=4 "$room/$program" 2>&1)
+        /usr/bin/codesign --verify --strict --verbose=2 "$room/$program"
+        details=$(/usr/bin/codesign --display --verbose=4 "$room/$program" 2>&1)
         grep -Fx "TeamIdentifier=$team" <<< "$details" > /dev/null ||
             fail "$program is not signed by team $team"
         grep -E '^Authority=Developer ID Application: ' <<< "$details" ||
             fail "$program has no Developer ID signature"
     done
-    spctl --assess --type install --verbose "$room/box" 2>&1 | tee /dev/stderr |
+    /usr/sbin/spctl --assess --type install --verbose "$room/box" 2>&1 | tee /dev/stderr |
         grep -Fx 'source=Notarized Developer ID' > /dev/null || fail "box is not notarized"
 fi
+
+echo "==> Installed files"
+ls -la "$box" "$room"
+[ "$(readlink "$box")" = "$room/box" ] || fail "$box does not link to $room/box"
+for file in strands-box-sock-alias strands-box-contain-trampoline release.json resources/packs/base/pack.toml; do
+    [ -e "$room/$file" ] || fail "missing $room/$file"
+done
+[ "$("$box" --version)" = "box $version" ] || fail "box --version does not print box $version"
+"$box" help agent | grep -F "$room/resources/packs" > /dev/null ||
+    fail "box help agent does not name the packs in $room/resources"
 
 echo "==> Box run"
 # Not under /tmp, which a box on Linux may write to, so the outside-write check means something.
@@ -60,10 +62,12 @@ run profile create claude --with bedrock --policy open
 run run probe --no-banner -- -c 'echo inside > proof.txt'
 [ "$(cat proof.txt)" = inside ] || fail "the box could not write in the project"
 
+# The box writes a marker first, so this check fails if the box never started.
 echo original > "$home/outside.txt"
-if run run probe --no-banner -- -c "echo changed > '$home/outside.txt'"; then
+if run run probe --no-banner -- -c "echo started > marker.txt; echo changed > '$home/outside.txt'"; then
     fail "the box wrote outside the project"
 fi
+[ "$(cat marker.txt 2> /dev/null)" = started ] || fail "the box did not start"
 [ "$(cat "$home/outside.txt")" = original ] || fail "the box changed a file outside the project"
 
 echo "==> box $version passed"
