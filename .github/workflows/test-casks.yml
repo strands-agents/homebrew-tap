@@ -16,6 +16,7 @@ jobs:
       matrix:
         runner: [macos-15, ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     env:
       DO_NOT_TRACK: "1"
       BOX_TELEMETRY: "0"
@@ -24,7 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # The token lets the action fetch this tap while the repo is private.
       - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+        with:
+          token: ${{ github.token }}
 
       - name: Style and audit
         run: |
