@@ -42,7 +42,7 @@ if [ "$(uname -s)" = Darwin ]; then
 fi
 
 echo "==> Box run"
-# Not under /tmp: a Linux box gets a private /tmp, so a write there never reaches the host.
+# Not under /tmp, which a box on Linux may write to, so the outside-write check means something.
 home=$(mktemp -d "${RUNNER_TEMP:-$HOME}/box-cask-test.XXXXXX")
 trap 'rm -rf "$home"' EXIT
 mkdir -p "$home/.strands/box/profiles" "$home/project"
