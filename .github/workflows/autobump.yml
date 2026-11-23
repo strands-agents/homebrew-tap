@@ -1,0 +1,45 @@
+name: Bump casks
+
+on:
+  schedule:
+    - cron: "41 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: autobump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: github.repository == 'strands-agents/homebrew-tap'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      # Pull requests opened with the default token don't start the Tests workflow, so the bump
+      # needs its own token with contents and pull-requests write access on this repository.
+      - name: Check the bump token
+        id: token
+        env:
+          TOKEN: ${{ secrets.HOMEBREW_TAP_BUMP_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Set the HOMEBREW_TAP_BUMP_TOKEN secret to open bump pull requests."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+        if: steps.token.outputs.present == 'true'
+        with:
+          token: ${{ github.token }}
+
+      - uses: Homebrew/actions/bump-packages@61b401267256bb9c047d6d1481b176d5772a0ba7 # main
+        if: steps.token.outputs.present == 'true'
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_BUMP_TOKEN }}
+          casks: strands-agents/tap/box
+          fork: false
