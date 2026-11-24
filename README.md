@@ -131,7 +131,9 @@ release's `SHA256SUMS.txt`, and the tap's tests check that this file has a build
 Box's release workflow on `main`. To check a download yourself:
 
 ```sh
-gh attestation verify box-cli-<tag>-<triple>.tar.gz --repo strands-agents/box
+gh attestation verify box-cli-<tag>-<triple>.tar.gz --repo strands-agents/box \
+  --signer-workflow strands-agents/box/.github/workflows/deploy-box-artifact.yml \
+  --source-ref refs/heads/main
 ```
 
 On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
