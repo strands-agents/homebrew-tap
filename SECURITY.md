@@ -6,7 +6,8 @@ This repository holds Homebrew casks and the workflows that test and update them
 here includes:
 
 - A cask that downloads from a source other than the tool's official GitHub releases
-- A checksum that doesn't match the release's published `SHA256SUMS.txt`
+- A checksum that doesn't match the release's published `SHA256SUMS.txt`, or a `SHA256SUMS.txt`
+  without a build attestation from the tool's release workflow
 - A cask or workflow that changes, re-signs or replaces a release package
 - A workflow that exposes a token or lets an untrusted pull request write to the repository
 
