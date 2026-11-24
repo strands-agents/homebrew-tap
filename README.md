@@ -127,7 +127,12 @@ which -a box
 ## Verify the install
 
 Homebrew checks each download against the SHA-256 checksum in the cask. Those checksums match the
-release's `SHA256SUMS.txt`.
+release's `SHA256SUMS.txt`, and the tap's tests check that this file has a build attestation from
+Box's release workflow on `main`. To check a download yourself:
+
+```sh
+gh attestation verify box-cli-<tag>-<triple>.tar.gz --repo strands-agents/box
+```
 
 On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
 keeps both:

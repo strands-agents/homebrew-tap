@@ -59,7 +59,7 @@ alone. On Linux, it needs unprivileged user namespaces.
 
 Follow Homebrew's [Cask Cookbook](https://docs.brew.sh/Cask-Cookbook) for the cask format. Keep a
 cask's `url` on the tool's own GitHub releases, and take its checksums from the release's
-`SHA256SUMS.txt`.
+`SHA256SUMS.txt`. The checksum test needs `gh`, because it checks that file's build attestation.
 
 ## Add a package
 

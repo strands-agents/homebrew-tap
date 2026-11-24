@@ -1,6 +1,8 @@
 #!/bin/bash
 # Checks that every download in a cask has the checksum its release lists in SHA256SUMS.txt.
 # A bump hashes whatever it downloads, so this ties the cask back to what the release published.
+# Each SHA256SUMS.txt must also carry a build attestation from the release workflow on main, so it
+# needs gh, signed in or with GH_TOKEN set.
 #
 # It reads the cask as Homebrew evaluates it on this machine, for every OS and architecture. That
 # covers declarative casks, like the ones in this tap. A cask that branches on something else, such
@@ -58,8 +60,23 @@ for cask in "$@"; do
         done
         asset=${url##*/}
         sums="$work/$(printf '%s' "${url%/*}" | tr -c 'A-Za-z0-9' _)"
-        [ -f "$sums" ] || curl -fsSL --retry 3 "${url%/*}/SHA256SUMS.txt" -o "$sums" ||
-            fail "cannot download SHA256SUMS.txt for $url"
+        if [ ! -f "$sums" ]; then
+            curl -fsSL --retry 3 "${url%/*}/SHA256SUMS.txt" -o "$sums.download" ||
+                fail "cannot download SHA256SUMS.txt for $url"
+            # SHA256SUMS.txt must carry an attestation from the repository's release workflow on
+            # main, so a checksum file that workflow didn't publish can't vouch for a download.
+            repo=${BASH_REMATCH[1]}
+            case "$repo" in
+                box) workflow=deploy-box-artifact.yml ;;
+                *) fail "no release workflow is known for strands-agents/$repo" ;;
+            esac
+            gh attestation verify "$sums.download" --repo "strands-agents/$repo" \
+                --signer-workflow "strands-agents/$repo/.github/workflows/$workflow" \
+                --source-ref refs/heads/main > /dev/null ||
+                fail "SHA256SUMS.txt for $url has no attestation from strands-agents/$repo's $workflow on main"
+            mv "$sums.download" "$sums"
+            echo "SHA256SUMS.txt for ${url%/*} is attested"
+        fi
         expected=$(awk -v asset="$asset" '$2 == asset || $2 == "*" asset { print $1 }' "$sums")
         [ -n "$expected" ] || fail "SHA256SUMS.txt lists no $asset"
         [ "$(wc -l <<< "$expected")" -eq 1 ] || fail "SHA256SUMS.txt lists $asset more than once"
