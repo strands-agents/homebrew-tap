@@ -71,7 +71,9 @@ A new package needs:
 3. A job in [`tests.yml`](.github/workflows/tests.yml) that runs that script on every platform the
    package supports.
 4. Its name in [`autobump.yml`](.github/workflows/autobump.yml).
-5. A row in the package table in the [README](README.md).
+5. A row in the package table in the [README](README.md) that links to the tool's own Homebrew
+   install guide. The guide, in the tool's repository, covers its requirements, install, upgrade and
+   uninstall.
 
 ## Pull requests
 
