@@ -27,137 +27,71 @@ This is the official [Homebrew tap](https://docs.brew.sh/Taps) for [Strands Agen
 It installs the release packages that Strands publishes on GitHub, unchanged. Homebrew doesn't
 rebuild them.
 
-| Package | Type | Description |
-| --- | --- | --- |
-| [`box`](Casks/box.rb) | Cask | [Strands Box](https://github.com/strands-agents/box): sandbox for running AI coding agents under a policy |
+## Packages
 
-## Install Strands Box
+| Package | Type | Description | Install, upgrade and uninstall |
+| --- | --- | --- | --- |
+| [`box`](Casks/box.rb) | Cask | [Strands Box](https://github.com/strands-agents/box): sandbox for running AI coding agents under a policy | [Install Box with Homebrew](https://github.com/strands-agents/box/blob/main/docs/cli/install.md#install-with-homebrew) |
+
+Each package's guide gives its requirements, its exact commands, what it keeps on your machine and
+what to do next.
+
+## Install a package
+
+Install a cask by its full name:
 
 ```sh
-brew install --cask strands-agents/tap/box
+brew install --cask strands-agents/tap/<package>
 ```
 
-This adds the tap, trusts the `box` cask, and installs `box` into Homebrew's `bin` folder. Check
-that it works:
-
-```sh
-box --version
-```
-
-Then [create a profile](https://github.com/strands-agents/box/blob/main/docs/cli/getting-started.md#2-create-a-claude-code-profile)
-and run your first agent. Box is already installed, so skip that guide's install step.
-
-`box` sends usage telemetry. To opt out, run `box telemetry off`.
-[Usage telemetry](https://github.com/strands-agents/box/blob/main/CLI_TELEMETRY.md) says what it sends.
-
-### Requirements
-
-| Platform | Supported |
-| --- | --- |
-| macOS 15 or later on Apple silicon | Yes |
-| Linux on ARM64 or x86-64, glibc 2.34 or later | Yes |
-| Intel Macs | No |
-
-On Linux, the box needs unprivileged user namespaces. Ubuntu 24.04 blocks them by default, so a box
-won't start until AppArmor lets Box's `strands-box-contain-trampoline` create them. See
-[Linux requirements](https://github.com/strands-agents/box/blob/main/docs/user/linux-requirements.md).
+This adds the tap and trusts that one package.
 
 ### Install by short name
 
 Since Homebrew 6.0, Homebrew loads a third-party tap's code only after you trust it
-([Tap Trust](https://docs.brew.sh/Tap-Trust)). The full name above trusts only the `box` cask. To use
-the short name instead, trust the cask once:
+([Tap Trust](https://docs.brew.sh/Tap-Trust)). The full name above trusts only the package you
+install. To use the short name instead, trust the package once:
 
 ```sh
 brew tap strands-agents/tap
-brew trust --cask strands-agents/tap/box
-brew install --cask box
+brew trust --cask strands-agents/tap/<package>
+brew install --cask <package>
 ```
 
 ## Upgrade
 
 ```sh
 brew update
-brew upgrade --cask box
+brew upgrade --cask <package>
 ```
 
-The cask follows Box's stable releases and skips pre-releases. A new release reaches the tap when its
-bump pull request is merged.
+Each cask follows its tool's stable releases and skips pre-releases. A new release reaches the tap
+when its bump pull request is merged.
 
-## Uninstall
+## Remove the tap
 
-```sh
-brew uninstall --cask box
-```
-
-This removes the `box` program and its release files. Your profiles, packs, storage and run records
-stay in `~/.strands/box`. To remove them too, delete that folder.
-
-To remove the tap:
+Uninstall each package as its guide says, then remove the tap:
 
 ```sh
 brew untap strands-agents/tap
 ```
 
-## Switch from the install script
+## How downloads are checked
 
-Use one install method on a machine, so that `box` on your `PATH` is the one you upgrade. To switch
-from the install script to Homebrew, install the cask first:
-
-```sh
-brew install --cask strands-agents/tap/box
-```
-
-Then remove what the install script added. The first command deletes the script's release files, and
-the second deletes its link to them:
-
-```sh
-rm -rf ~/.strands/box/packages
-rm ~/.local/bin/box
-```
-
-Your profiles in `~/.strands/box` keep working. If the script also added a `# >>> Box PATH >>>` block
-to your shell's startup file, [Uninstall](https://github.com/strands-agents/box/blob/main/docs/cli/install.md#uninstall)
-says how to remove it. Check that your shell finds Homebrew's `box`:
-
-```sh
-which -a box
-```
-
-## Verify the install
-
-Homebrew checks each download against the SHA-256 checksum in the cask. Those checksums match the
-release's `SHA256SUMS.txt`, and the tap's tests check that this file has a build attestation from
-Box's release workflow on `main`. To check a download yourself:
-
-```sh
-gh attestation verify box-cli-<tag>-<triple>.tar.gz --repo strands-agents/box \
-  --signer-workflow strands-agents/box/.github/workflows/deploy-box-artifact.yml \
-  --source-ref refs/heads/main
-```
-
-On macOS, the release is signed with the publisher's Developer ID and notarized by Apple. The cask
-keeps both:
-
-```sh
-codesign --verify --strict --verbose=2 "$(brew --caskroom)/box/$(box --version | cut -d' ' -f2)/box"
-spctl --assess --type install --verbose "$(brew --caskroom)/box/$(box --version | cut -d' ' -f2)/box"
-```
-
-`spctl` prints `source=Notarized Developer ID`. The Linux packages aren't signed.
+Homebrew checks each download against the SHA-256 checksum in the cask. The tap's tests check that
+each checksum matches the release's `SHA256SUMS.txt`, and that this file has a build attestation from
+the tool's release workflow on `main`. Each package's guide says how to check a download yourself.
 
 ## Troubleshooting
 
 | Problem | What to do |
 | --- | --- |
-| `Refusing to load cask strands-agents/tap/box from untrusted tap` | Install by the full name, `strands-agents/tap/box`, or trust the cask as shown in [Install by short name](#install-by-short-name). |
-| `box --version` shows an older release | Another `box` comes first on your `PATH`. Run `which -a box`, and see [Switch from the install script](#switch-from-the-install-script). |
-| Homebrew refuses the cask on a Mac | Box needs Apple silicon and macOS 15 or later. |
-| A box fails to start on Linux | See [Linux requirements](https://github.com/strands-agents/box/blob/main/docs/user/linux-requirements.md) and [Troubleshooting](https://github.com/strands-agents/box/blob/main/docs/cli/troubleshooting.md). |
+| `Refusing to load cask strands-agents/tap/<package> from untrusted tap` | Install by the full name, or trust the package as shown in [Install by short name](#install-by-short-name). |
+| Anything else about a package | See its guide in [Packages](#packages). |
 
 Report problems with installing or upgrading in this repository's
-[issues](https://github.com/strands-agents/homebrew-tap/issues). Report problems with Box itself in
-[strands-agents/box](https://github.com/strands-agents/box/issues).
+[issues](https://github.com/strands-agents/homebrew-tap/issues). Report problems with a tool itself in
+that tool's own repository.
 
 ## Contributing
 
