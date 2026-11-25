@@ -80,7 +80,8 @@ brew untap strands-agents/tap
 
 Homebrew checks each download against the SHA-256 checksum in the cask. The tap's tests check that
 each checksum matches the release's `SHA256SUMS.txt`, and that this file has a build attestation from
-the tool's release workflow on `main`. Each package's guide says how to check a download yourself.
+the tool's release workflow on `main`. To check a `box` download yourself, use the
+`gh attestation verify` command in its [release notes](https://github.com/strands-agents/box/releases).
 
 ## Troubleshooting
 
