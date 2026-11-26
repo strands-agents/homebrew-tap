@@ -2,10 +2,10 @@ cask "box" do
   arch arm: "aarch64", intel: "x86_64"
   os macos: "apple-darwin", linux: "unknown-linux-gnu"
 
-  version "0.3.1"
-  sha256 arm:          "64e8668f0867f268127192cad1f5524575c24d9d6bb130ebe0b54dedda145a73",
-         arm64_linux:  "741d7f33db01e77974dd8c93c724de737e57b39b82fa03344933527e7e2b06d5",
-         x86_64_linux: "bb7dbc4d628b08838331ce63670fafb3b3f4fa8df6693309c47b1bea6095bdd9"
+  version "0.3.2"
+  sha256 arm:          "3f65565737411fa17f743e7beb1b39e1bc35e43f8e2755fc62595d41326f6262",
+         arm64_linux:  "5db4623989377c2990c639fbfa8d533546c70c67319e016ad113769dc807c985",
+         x86_64_linux: "d91e7344a23ce89b83d9212543bb22e68b7b67afef4623185e86f83edf79e521"
 
   on_macos do
     depends_on arch: :arm64
